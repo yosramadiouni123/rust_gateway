@@ -91,9 +91,9 @@ async fn echo_server(stream: TcpStream) -> Result {
         } ; */
         coarse_sleep(Duration::from_secs(1)) ;
         let payload = EthCanfdpayLoad::to_eth_frame(canfd) ; 
-        pr_info!("DONE THE CONVERTION FROM CANFD FRAME INTO ETHERNET FRAME ") ; 
+        pr_info!("DONE THE CONVERSION FROM CANFD FRAME INTO ETHERNET FRAME ") ; 
         coarse_sleep(Duration::from_secs(1)) ;
-        pr_info!("-- Eth Can Frame --");
+        pr_info!("-- Eth Canfd Frame --");
         coarse_sleep(Duration::from_secs(1)) ;
         pr_info!("  Destination MAC: {:?}", payload.dst);
         coarse_sleep(Duration::from_secs(1)) ;
@@ -144,7 +144,7 @@ async fn echo_server(stream: TcpStream) -> Result {
         coarse_sleep(Duration::from_secs(1)) ;
         pr_info!("PREPARING FOR A CONVERSION ") ; 
         coarse_sleep(Duration::from_secs(1)) ;
-        pr_info!("DONE THE CONVERTION FROM CAN FRAME INTO ETHERNET FRAME ") ; 
+        pr_info!("DONE THE CONVERSION FROM CAN FRAME INTO ETHERNET FRAME ") ; 
         coarse_sleep(Duration::from_secs(1)) ;
         pr_info!("-- Eth Can Frame --");
         coarse_sleep(Duration::from_secs(1)) ;
@@ -158,7 +158,7 @@ async fn echo_server(stream: TcpStream) -> Result {
         coarse_sleep(Duration::from_secs(1)) ;
         pr_info!("-------------------------------") ;*/
        
-    } else  {
+    } else  if n > 60 {
         
         pr_info!("-------------------------------") ;
         coarse_sleep(Duration::from_secs(1)) ;
@@ -169,6 +169,15 @@ async fn echo_server(stream: TcpStream) -> Result {
         pr_info!("-------------------------------") ;
         
         
+    }
+    else {
+        pr_info!("-------------------------------") ;
+        coarse_sleep(Duration::from_secs(1)) ;
+        pr_err!(" Panicking...");
+        coarse_sleep(Duration::from_secs(1)) ;
+        pr_info!("-------------------------------") ; 
+        coarse_sleep(Duration::from_secs(1)) ;
+        pr_info!("-------------------------------") ;
     }
    
     stream.write_all(&buff[..n]).await?;
@@ -194,18 +203,18 @@ fn start_listener(ex: ArcBorrow<'_, impl Executor + Send + Sync + 'static>) -> R
     Ok(())
 }
 
-pub fn connect(address: &SocketAddr) -> Result<net::TcpStream> {
+/*pub fn connect(address: &SocketAddr) -> Result<net::TcpStream> {
     let socket = Socket::new(AddressFamily::Inet, SockType::Stream, IpProtocol::Tcp)?;
     socket.connect(address, 0)?; 
     Ok(net::TcpStream {sock:unsafe{socket.as_inner()}})
-}
+}*/
 
 
-pub fn send_data(stream: &net::TcpStream, data: Vec<u8>) -> Result<usize> {
+/*pub fn send_data(stream: &net::TcpStream, data: Vec<u8>) -> Result<usize> {
     // Ensure the data vector has exactly 52 elements
     
     
-    let mut buffer = [0u8; 13];
+    let mut buffer = [0u8; 52];
     for (i, &item) in data.iter().enumerate() {
         if i >= 64 {
             break; // Prevent index out of bounds
@@ -217,7 +226,7 @@ pub fn send_data(stream: &net::TcpStream, data: Vec<u8>) -> Result<usize> {
 
     // Return the number of bytes written
    
-}
+}*/
 
 
 struct RustEchoServer {
@@ -230,7 +239,7 @@ impl kernel::Module for RustEchoServer {
         pr_info!("************************echooooooooo********************************\n");
       
         start_listener(handle.executor())?;
-        //echo_server(stream)
+        //echo_server(stream);
         Ok(Self {
             _handle: handle.into(),
         })
