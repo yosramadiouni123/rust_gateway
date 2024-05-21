@@ -105,7 +105,13 @@ async fn echo_server(stream: TcpStream) -> Result {
 
 
 
-
+fn start_listener(ex: ArcBorrow<'_, impl Executor + Send + Sync + 'static>) -> Result {
+    let addr = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::ANY, 8080));
+    let listener = TcpListener::try_new(net::init_ns(), &addr)?;
+    pr_info!("LIstening") ;
+    spawn_task!(ex, accept_loop(listener, ex.into()))?;
+    Ok(())
+}
 
 
 async fn accept_loop(listener: TcpListener, executor: Arc<impl Executor>) {
@@ -115,13 +121,7 @@ async fn accept_loop(listener: TcpListener, executor: Arc<impl Executor>) {
         }
     }
 }
-fn start_listener(ex: ArcBorrow<'_, impl Executor + Send + Sync + 'static>) -> Result {
-    let addr = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::ANY, 8080));
-    let listener = TcpListener::try_new(net::init_ns(), &addr)?;
-    pr_info!("LIstening") ;
-    spawn_task!(ex, accept_loop(listener, ex.into()))?;
-    Ok(())
-}
+
 
 struct RustEchoServer {
     _handle: AutoStopHandle<dyn Executor>,
