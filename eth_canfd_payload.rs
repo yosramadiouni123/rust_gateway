@@ -11,14 +11,13 @@ use alloc::borrow::ToOwned;
 /// Could look at a potential bindgen use 
 /// This struct defines some of the fields of the canfd_frame
 /// Could look at a potential bindgen use 
-#[repr(C, align(8))]
 #[derive(PartialEq)]
 #[derive(Clone)]
 pub struct canfdFrame {
     pub can_id: canid_t,
     pub len: u8,
     pub flags: u8,
-    pub data : [u8;4]
+    pub data : [u8;46]
     /* private fields */
 }
 
@@ -32,7 +31,7 @@ impl canfdFrame {
     pub fn get_flags(&self) -> u8 {
         self.flags
     }
-    pub fn get_data(&self) -> &[u8; 4] {
+    pub fn get_data(&self) -> &[u8; 46] {
         &self.data
     }
 }
@@ -62,8 +61,8 @@ impl EtherTypefd {
 #[derive(PartialEq)]
 #[derive(Clone)]
 pub struct TcpFrame {
-    pub header: TcpHeader,
-    pub data: [u8;4],
+    pub tcphdr: TcpHeader,
+    pub data: [ u8; 4],
 }
 
 /// Ipv4Frame struct
@@ -95,7 +94,7 @@ impl EthFrame {
     }
     pub fn get_tcp_header(&self) -> Option<&TcpHeader> {
         if self.ethertype == EtherTypefd::IPV4 {
-            Some(&self.data.data.header)
+            Some(&self.data.data.tcphdr)
         } else {
             None
         }
@@ -284,25 +283,22 @@ impl EthCanfdpayLoad {
         let mut data = Vec::new();
         data.try_extend_from_slice(&payload.data.data);
         let eth_frame = EthFrame {
-            dst: [0xDE, 0xAD, 0xBE, 0xEF, 0xCA, 0xFE],
-            src: [0x12, 0x34, 0x56, 0x78, 0x90, 0xAB],
+            dst: [0x00, 0x11, 0x22, 0x33, 0x44, 0x55],
+            src: [0x00, 0x34, 0x56, 0x78, 0x90, 0xAB],
             ethertype: payload.ethertype,
             data: Ipv4Frame {
                 header: ip_header,
                 data: TcpFrame {
-                    header: tcp_header,
+                    tcphdr: tcp_header,
                     data:payload.data.data,
                 },
-            },        };
+            },        
+        };
         eth_frame
     }
 
-
-
-
     pub fn deserialize_eth_payload(buffer: &[u8]) -> Option<Self> {
        
-
         // Extract individual field slices using nom library
         let (dst_mac, rest) = buffer.split_at(6);
         let (src_mac, rest) = rest.split_at(6);
