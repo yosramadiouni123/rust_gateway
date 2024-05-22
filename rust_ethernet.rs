@@ -18,7 +18,7 @@ use alloc::vec::*;
 
 module! {
     type: RustClientTest,
-    name: "RUST_CAN",
+    name: "RUST_ETHERNET",
     license: "GPL",
     params: {
         devices: u32 {
