@@ -19,6 +19,7 @@ use kernel::net::*;
 async fn echo_server(stream: TcpStream) -> Result {
     let mut buf = [0u8; 52];
     loop {
+        
         let n = stream.read(&mut buf).await?;
         pr_info!("RECEIVING DATA FROM THE GATEWAY MODULE : MODE CANFD->ETHERNET") ; 
         coarse_sleep(Duration::from_secs(1)) ;
