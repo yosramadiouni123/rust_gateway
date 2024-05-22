@@ -122,7 +122,34 @@ async fn echo_server(stream: TcpStream) -> Result {
         pr_info!("  Time to Live: {} hops", payload.data.header.ttl);
         coarse_sleep(Duration::from_secs(1)) ;
         pr_info!("-------------------------------") ; 
+         // Print TCP  Header details
+         pr_info!("-- TCP Header --");
+         coarse_sleep(Duration::from_secs(1)) ;
+         pr_info!("  Source port: {}", payload.data.data.tcphdr.src_port);
+         coarse_sleep(Duration::from_secs(1)) ;
+         pr_info!("  Destination port: {}", payload.data.data.tcphdr.dst_port);
+         coarse_sleep(Duration::from_secs(1)) ;
+         pr_info!("  Seq: {}", payload.data.data.tcphdr.seq);
+         coarse_sleep(Duration::from_secs(1)) ;
+         pr_info!("  Ack: {} ", payload.data.data.tcphdr.ack);
+         coarse_sleep(Duration::from_secs(1)) ;
+         pr_info!("  Offset: {}", payload.data.data.tcphdr.offset);
+         coarse_sleep(Duration::from_secs(1)) ;
+         pr_info!("  Reserved: {}", payload.data.data.tcphdr.reserved);
+         coarse_sleep(Duration::from_secs(1)) ;
+         pr_info!("  Flags: {:x} ", payload.data.data.tcphdr.flags);
+         coarse_sleep(Duration::from_secs(1)) ;
+         pr_info!("  Window: {} ", payload.data.data.tcphdr.window);
+         coarse_sleep(Duration::from_secs(1)) ;
+         pr_info!("  Checksum: {} ", payload.data.data.tcphdr.checksum);
+         coarse_sleep(Duration::from_secs(1)) ;
+         pr_info!("  Urgent_ptr: {} ", payload.data.data.tcphdr.urgent_ptr);
+         coarse_sleep(Duration::from_secs(1)) ;
+         pr_info!("-------------------------------") ; 
         coarse_sleep(Duration::from_secs(1)) ;
+        // Print data details
+        //pr_info!("  Data: {} ", payload.data.data);
+        //coarse_sleep(Duration::from_secs(1)) ;
         pr_info!("-------------------------------") ; 
         coarse_sleep(Duration::from_secs(1)) ;
         pr_info!("-------------------------------") ; 
@@ -203,30 +230,8 @@ fn start_listener(ex: ArcBorrow<'_, impl Executor + Send + Sync + 'static>) -> R
     Ok(())
 }
 
-/*pub fn connect(address: &SocketAddr) -> Result<net::TcpStream> {
-    let socket = Socket::new(AddressFamily::Inet, SockType::Stream, IpProtocol::Tcp)?;
-    socket.connect(address, 0)?; 
-    Ok(net::TcpStream {sock:unsafe{socket.as_inner()}})
-}*/
 
 
-/*pub fn send_data(stream: &net::TcpStream, data: Vec<u8>) -> Result<usize> {
-    // Ensure the data vector has exactly 52 elements
-    
-    
-    let mut buffer = [0u8; 52];
-    for (i, &item) in data.iter().enumerate() {
-        if i >= 64 {
-            break; // Prevent index out of bounds
-        }
-        buffer[i] = item;
-    }
-    // Write the data vector to the stream
-    stream.write(&buffer,true)
-
-    // Return the number of bytes written
-   
-}*/
 
 
 struct RustEchoServer {
