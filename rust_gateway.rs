@@ -19,7 +19,7 @@ use kernel::net::*;
 
 
 async fn echo_server(stream: TcpStream) -> Result {
-    let mut buff = [0u8; 60 ];
+    let mut buff = [0u8; 52 ];
     loop {
         let n = stream.read(&mut buff).await?;
         pr_info!("RECEIVING CANFD FRAME FROM THE NETLINK CLIENT ! ") ; 
@@ -28,9 +28,6 @@ async fn echo_server(stream: TcpStream) -> Result {
             return Ok(());
         }
 
-
-
-        if  12< n && n<= 60 {
         pr_info!("-------------------------------") ; 
         coarse_sleep(Duration::from_secs(1)) ;
         pr_info!("start the conversion from CANFD to Ethernet \n");
@@ -39,6 +36,36 @@ async fn echo_server(stream: TcpStream) -> Result {
         coarse_sleep(Duration::from_secs(1)) ;
         pr_info!("-------------------------------") ; 
         coarse_sleep(Duration::from_secs(1)) ;
+        let canfd = canfdFrame ::deserialize_canfd_payload(&buff).unwrap();
+        pr_info!("DONE DESERIALIZING THE CANFD FRAME ")  ; 
+        coarse_sleep(Duration::from_secs(1)) ;
+        pr_info!("PREPARING FOR A CONVERSION ") ; 
+        coarse_sleep(Duration::from_secs(1)) ;
+        let payload_data = EthCanfdpayLoad::to_eth_frame(&canfd) ; 
+        pr_info!("DONE THE CONVERSION FROM CANFD FRAME INTO ETHERNET FRAME ") ; 
+        coarse_sleep(Duration::from_secs(1)) ;
+        pr_info!("-------------------------------") ; 
+        coarse_sleep(Duration::from_secs(1)) ;
+        pr_info!("-------------------------------") ; 
+        coarse_sleep(Duration::from_secs(1)) ;
+        pr_info!("-------------------------------") ;
+        pr_info!("PREPARING TO SEND TO THE ETHERNET DEVICE ") ; 
+        coarse_sleep(Duration::from_secs(1)) ;
+        let remote_addr = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::ANY, 7070)) ;
+        pr_info!("---INFO--- CREATED GATEWAY SOCKET SUCCCESSFULLY !") ;
+        coarse_sleep(Duration::from_secs(1)) ; 
+        let stream1 = connect(&remote_addr)?;
+        // Example number to send 
+        let buf1=serialize_eth_canfd_payload(&payload_data) ; 
+        pr_info!("len  {:}", buf1.len());
+
+        pr_info!("DONE SERIALIZING THE ETHERNET FRAME , SENDING TO THE ETHERNET DEVICE") ;
+        coarse_sleep(Duration::from_secs(1)) ;  
+        send_data(&stream1, buf1)? ; //test
+        pr_info!("---INFO--- SEND DATA FUNCTION IS BEING CALLED !") ; 
+        coarse_sleep(Duration::from_secs(1)) ;
+        pr_info!("---INFO--- SENDING TO THE ETHERNET DEVICE ! ") ;
+        coarse_sleep(Duration::from_secs(1)) ; 
 
         /*pr_info!("-- Eth Canfd Frame --");
         pr_info!("  Destination MAC: {:?}", payload.dst_mac);
@@ -51,10 +78,7 @@ async fn echo_server(stream: TcpStream) -> Result {
         pr_info!("buffer is {:?}", buff );
         coarse_sleep(Duration::from_secs(1)) ;*/
 
-        let canfd = EthCanfdpayLoad ::deserialize_eth_payload(&buff).unwrap();
-        pr_info!("DONE DESERIALIZING THE CANFD FRAME ")  ; 
-        coarse_sleep(Duration::from_secs(1)) ;
-        pr_info!("PREPARING FOR A CONVERSION ") ; 
+  
         /*let mock = EthCanfdpayLoad {
             dst_mac: [0xDE, 0xAD, 0xBE, 0xEF, 0xCA, 0xFE],
             src_mac: [0x12, 0x34, 0x56, 0x78, 0x90, 0xAB],
@@ -68,7 +92,7 @@ async fn echo_server(stream: TcpStream) -> Result {
                     id: 100, // Example ID
                     flags: 0, // Flags field example (no flags set)
                     frag_offset: 0, // Fragment offset (no fragmentation)
-                    ttl: 64, // Time to live example
+                    ttl: 56, // Time to live example
                     protocol: 6, // TCP protocol
                     checksum: 0xABCD, // Mock checksum value
                     src: [192, 168, 1, 10],
@@ -89,11 +113,8 @@ async fn echo_server(stream: TcpStream) -> Result {
                 data: [0xCA, 0xFE, 0xBA, 0xBE], // Example data
             }
         } ; */
-        coarse_sleep(Duration::from_secs(1)) ;
-        let payload = EthCanfdpayLoad::to_eth_frame(canfd) ; 
-        pr_info!("DONE THE CONVERSION FROM CANFD FRAME INTO ETHERNET FRAME ") ; 
-        coarse_sleep(Duration::from_secs(1)) ;
-        pr_info!("-- Eth Canfd Frame --");
+    
+        /*pr_info!("-- Eth Canfd Frame --");
         coarse_sleep(Duration::from_secs(1)) ;
         pr_info!("  Destination MAC: {:?}", payload.dst);
         coarse_sleep(Duration::from_secs(1)) ;
@@ -125,38 +146,32 @@ async fn echo_server(stream: TcpStream) -> Result {
          // Print TCP  Header details
          pr_info!("-- TCP Header --");
          coarse_sleep(Duration::from_secs(1)) ;
-         pr_info!("  Source port: {}", payload.data.data.tcphdr.src_port);
+         pr_info!("  Source port: {}", payload.data.datatcp.tcphdr.src_port);
          coarse_sleep(Duration::from_secs(1)) ;
-         pr_info!("  Destination port: {}", payload.data.data.tcphdr.dst_port);
+         pr_info!("  Destination port: {}", payload.data.datatcp.tcphdr.dst_port);
          coarse_sleep(Duration::from_secs(1)) ;
-         pr_info!("  Seq: {}", payload.data.data.tcphdr.seq);
+         pr_info!("  Seq: {}", payload.data.datatcp.tcphdr.seq);
          coarse_sleep(Duration::from_secs(1)) ;
-         pr_info!("  Ack: {} ", payload.data.data.tcphdr.ack);
+         pr_info!("  Ack: {} ", payload.data.datatcp.tcphdr.ack);
          coarse_sleep(Duration::from_secs(1)) ;
-         pr_info!("  Offset: {}", payload.data.data.tcphdr.offset);
+         pr_info!("  Offset: {}", payload.data.datatcp.tcphdr.offset);
          coarse_sleep(Duration::from_secs(1)) ;
-         pr_info!("  Reserved: {}", payload.data.data.tcphdr.reserved);
+         pr_info!("  Reserved: {}", payload.data.datatcp.tcphdr.reserved);
          coarse_sleep(Duration::from_secs(1)) ;
-         pr_info!("  Flags: {:x} ", payload.data.data.tcphdr.flags);
+         pr_info!("  Flags: {:x} ", payload.data.datatcp.tcphdr.flags);
          coarse_sleep(Duration::from_secs(1)) ;
-         pr_info!("  Window: {} ", payload.data.data.tcphdr.window);
+         pr_info!("  Window: {} ", payload.data.datatcp.tcphdr.window);
          coarse_sleep(Duration::from_secs(1)) ;
-         pr_info!("  Checksum: {} ", payload.data.data.tcphdr.checksum);
+         pr_info!("  Checksum: {} ", payload.data.datatcp.tcphdr.checksum);
          coarse_sleep(Duration::from_secs(1)) ;
-         pr_info!("  Urgent_ptr: {} ", payload.data.data.tcphdr.urgent_ptr);
+         pr_info!("  Urgent_ptr: {} ", payload.data.datatcp.tcphdr.urgent_ptr);
          coarse_sleep(Duration::from_secs(1)) ;
          pr_info!("-------------------------------") ; 
-        coarse_sleep(Duration::from_secs(1)) ;
+        coarse_sleep(Duration::from_secs(1)) ;*/
         // Print data details
         //pr_info!("  Data: {} ", payload.data.data);
         //coarse_sleep(Duration::from_secs(1)) ;
-        pr_info!("-------------------------------") ; 
-        coarse_sleep(Duration::from_secs(1)) ;
-        pr_info!("-------------------------------") ; 
-        coarse_sleep(Duration::from_secs(1)) ;
-        pr_info!("-------------------------------") ;
-
-
+      
 
 
         /*pr_info!("start the conversion from CAN to Ethernet \n");
@@ -165,7 +180,7 @@ async fn echo_server(stream: TcpStream) -> Result {
         coarse_sleep(Duration::from_secs(1)) ;
         pr_info!("-------------------------------") ; 
         coarse_sleep(Duration::from_secs(1)) ;
-        let payload = EthCanpayLoad ::deserialize_eth_payload(&buff).unwrap();
+        let payload = EthCanpayLoad ::deserialize_eth_canfd_payload(&buff).unwrap();
         coarse_sleep(Duration::from_secs(1)) ;
         pr_info!("DONE DESERIALIZING THE CAN FRAME ")  ; 
         coarse_sleep(Duration::from_secs(1)) ;
@@ -184,10 +199,9 @@ async fn echo_server(stream: TcpStream) -> Result {
         pr_info!("-------------------------------") ; 
         coarse_sleep(Duration::from_secs(1)) ;
         pr_info!("-------------------------------") ;*/
-       
-    } else  if n > 60 {
+        //stream.write_all(&buff[..n]).await?;
         
-        pr_info!("-------------------------------") ;
+        /*pr_info!("-------------------------------") ;
         coarse_sleep(Duration::from_secs(1)) ;
         pr_err!("Frame length exceeds buffer size. Panicking...");
         coarse_sleep(Duration::from_secs(1)) ;
@@ -195,22 +209,32 @@ async fn echo_server(stream: TcpStream) -> Result {
         coarse_sleep(Duration::from_secs(1)) ;
         pr_info!("-------------------------------") ;
         
-        
-    }
-    else {
         pr_info!("-------------------------------") ;
         coarse_sleep(Duration::from_secs(1)) ;
         pr_err!(" Panicking...");
         coarse_sleep(Duration::from_secs(1)) ;
         pr_info!("-------------------------------") ; 
         coarse_sleep(Duration::from_secs(1)) ;
-        pr_info!("-------------------------------") ;
-    }
-   
-    stream.write_all(&buff[..n]).await?;
+        pr_info!("-------------------------------") ;*/
     
+   
+    //stream.write_all(&buff[..n]).await?;
     }
-} 
+}
+
+
+pub fn send_data(stream: &net::TcpStream, data: Vec<u8>) -> Result<usize> {
+    // Ensure the data vector has exactly 52 elements
+    let mut buffer = [0u8; 102 ];
+    for (i, &item) in data.iter().enumerate() {
+        buffer[i] = item;
+    }
+    // Write the data vector to the stream
+    stream.write(&buffer,true)
+    // Return the number of bytes written
+   
+}
+
 
 
 async fn accept_loop(listener: TcpListener, executor: Arc<impl Executor>) {
@@ -225,13 +249,16 @@ fn start_listener(ex: ArcBorrow<'_, impl Executor + Send + Sync + 'static>) -> R
     let addr = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::ANY, 8080));
     let listener = TcpListener::try_new(net::init_ns(), &addr)?;
     pr_info!(" listening") ;
-
     spawn_task!(ex, accept_loop(listener, ex.into()))?;
     Ok(())
 }
 
 
-
+pub fn connect(address: &SocketAddr) -> Result<net::TcpStream> {
+    let socket = Socket::new(AddressFamily::Inet, SockType::Stream, IpProtocol::Tcp)?;
+    socket.connect(address, 0)?; 
+    Ok(net::TcpStream {sock:unsafe{socket.as_inner()}})
+}
 
 
 struct RustEchoServer {
@@ -242,7 +269,6 @@ impl kernel::Module for RustEchoServer {
     fn init(_name: &'static CStr, _module: &'static ThisModule) -> Result<Self> {
         let handle = WqExecutor::try_new(kernel::workqueue::system())?;
         pr_info!("************************echooooooooo********************************\n");
-      
         start_listener(handle.executor())?;
         //echo_server(stream);
         Ok(Self {
@@ -253,8 +279,8 @@ impl kernel::Module for RustEchoServer {
 
 module! {
     type: RustEchoServer,
-    name: "rust_echo_server",
+    name: "rust_gateway",
     author: "Rust for Linux Contributors",
-    description: "Rust tcp echo sample",
-    license: "GPL v2",
+    description: "Rust gateway",
+    license: "GPL",
 }
