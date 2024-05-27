@@ -21,7 +21,7 @@ use core::*;
 async fn echo_server(stream: TcpStream) -> Result {
     let mut buf = [0u8; 102];
         let _n = stream.read(&mut buf).await?;
-        pr_info!("/////////////////////////////////////////////////////////////////////////") ; 
+        //pr_info!("/////////////////////////////////////////////////////////////////////////") ; 
 
         pr_info!("RECEIVING DATA FROM THE GATEWAY MODULE : MODE CANFD->ETHERNET") ; 
         coarse_sleep(Duration::from_secs(1)) ;
@@ -30,7 +30,7 @@ async fn echo_server(stream: TcpStream) -> Result {
         //pr_info!("/////////////////////////////////////////////////////////////////////////") ; 
 
         let ethernet = EthCanfdpayLoad:: deserialize_eth_canfd_payload(&buf).unwrap();
-        pr_info!("/////////////////////////////////////////////////////////////////////////") ; 
+       // pr_info!("/////////////////////////////////////////////////////////////////////////") ; 
 
         pr_info!("ETHERNET FRAME INFORMATION : ");
         coarse_sleep(Duration::from_secs(1)) ;
@@ -43,9 +43,29 @@ async fn echo_server(stream: TcpStream) -> Result {
         pr_info!("\n  - CANFD Payload:");
         coarse_sleep(Duration::from_millis(500));  
         pr_info!("- IP Header:");
-        coarse_sleep(Duration::from_millis(500));  
+        coarse_sleep(Duration::from_millis(500)); 
+
         pr_info!("- Version: {:?}", ethernet.data.iphdr.version);
         coarse_sleep(Duration::from_millis(500));
+        pr_info!("- Length: {:?}", ethernet.data.iphdr.len);
+        coarse_sleep(Duration::from_millis(500));
+        pr_info!("- to_s: {:?}", ethernet.data.iphdr.to_s);
+        coarse_sleep(Duration::from_millis(500));
+        pr_info!("- The Total Length: {:?}", ethernet.data.iphdr.total_len);
+        coarse_sleep(Duration::from_millis(500));
+        pr_info!("-  The Identifier: {:?}", ethernet.data.iphdr.id);
+        coarse_sleep(Duration::from_millis(500));
+        pr_info!("- Flags: {:?}", ethernet.data.iphdr.flags);
+        coarse_sleep(Duration::from_millis(500));
+        pr_info!("- Frag offset: {:?}", ethernet.data.iphdr.frag_offset);
+        coarse_sleep(Duration::from_millis(500));
+        pr_info!("- ttl: {:?}", ethernet.data.iphdr.ttl);
+        coarse_sleep(Duration::from_millis(500));
+        pr_info!("- Protocol: {:?}", ethernet.data.iphdr.protocol);
+        coarse_sleep(Duration::from_millis(500));
+        pr_info!("- Checksum: {:?}", ethernet.data.iphdr.checksum);
+        coarse_sleep(Duration::from_millis(500));
+
         pr_info!("- Source IP: {}.{}.{}.{}",
         ethernet.data.iphdr.src[0], ethernet.data.iphdr.src[1], ethernet.data.iphdr.src[2], ethernet.data.iphdr.src[3]);
         pr_info!("- Destination IP: {}.{}.{}.{}",
@@ -70,11 +90,12 @@ async fn echo_server(stream: TcpStream) -> Result {
         pr_info!("- Flags: {:?}", ethernet.data.tcphdr.flags); // Use Debug trait for detailed flag information
         coarse_sleep(Duration::from_millis(500)); 
     // Additional TCP header fields (consider including only relevant ones):
-        pr_info!("- Data Offset: {}", ethernet.data.tcphdr.offset);
-        coarse_sleep(Duration::from_millis(500)); 
+        
         pr_info!("- Window: {}", ethernet.data.tcphdr.window);
         coarse_sleep(Duration::from_millis(500)); 
         pr_info!("- Checksum: {:x}", ethernet.data.tcphdr.checksum); // Hexadecimal format for checksum
+        coarse_sleep(Duration::from_millis(500)); 
+        pr_info!("- urgent_ptr: {}", ethernet.data.tcphdr.urgent_ptr);
         coarse_sleep(Duration::from_millis(500)); 
         pr_info!("- Payload");
         for i in 0..46 {
