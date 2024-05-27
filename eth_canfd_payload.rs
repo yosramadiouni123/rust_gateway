@@ -416,7 +416,7 @@ impl Ethloadfd {
     pub fn from_bytes(buffer: &[u8]) -> Option<Ethloadfd> {
        
         // Extract individual field slices
-        pr_info!("{}", buffer.len());
+        //pr_info!("{}", buffer.len());
         let (iphdr_bytes, rest) = buffer.split_at(21);
         let (tcphdr_bytes, rest) = rest.split_at(21);
         let (data, _) = rest.split_at(46);//46
