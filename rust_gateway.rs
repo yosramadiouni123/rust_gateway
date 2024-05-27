@@ -32,10 +32,10 @@ async fn echo_server(stream: TcpStream) -> Result {
         coarse_sleep(Duration::from_secs(1)) ;
         pr_info!("start the conversion from CANFD to Ethernet \n");
         coarse_sleep(Duration::from_secs(1)) ;
-        pr_info!("buffer is {:?}", buff );
-        coarse_sleep(Duration::from_secs(1)) ;
-        pr_info!("-------------------------------") ; 
-        coarse_sleep(Duration::from_secs(1)) ;
+        //pr_info!("buffer is {:?}", buff );
+        //coarse_sleep(Duration::from_secs(1)) ;
+        //pr_info!("-------------------------------") ; 
+        //coarse_sleep(Duration::from_secs(1)) ;
         let canfd = canfdFrame ::deserialize_canfd_payload(&buff).unwrap();
         pr_info!("DONE DESERIALIZING THE CANFD FRAME ")  ; 
         coarse_sleep(Duration::from_secs(1)) ;
@@ -44,11 +44,11 @@ async fn echo_server(stream: TcpStream) -> Result {
         let payload_data = EthCanfdpayLoad::to_eth_frame(&canfd) ; 
         pr_info!("DONE THE CONVERSION FROM CANFD FRAME INTO ETHERNET FRAME ") ; 
         coarse_sleep(Duration::from_secs(1)) ;
-        pr_info!("-------------------------------") ; 
-        coarse_sleep(Duration::from_secs(1)) ;
-        pr_info!("-------------------------------") ; 
-        coarse_sleep(Duration::from_secs(1)) ;
-        pr_info!("-------------------------------") ;
+        //pr_info!("-------------------------------") ; 
+        //coarse_sleep(Duration::from_secs(1)) ;
+        //pr_info!("-------------------------------") ; 
+        //coarse_sleep(Duration::from_secs(1)) ;
+       // pr_info!("-------------------------------") ;
         pr_info!("PREPARING TO SEND TO THE ETHERNET DEVICE ") ; 
         coarse_sleep(Duration::from_secs(1)) ;
         let remote_addr = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::ANY, 7070)) ;
@@ -268,7 +268,7 @@ struct RustEchoServer {
 impl kernel::Module for RustEchoServer {
     fn init(_name: &'static CStr, _module: &'static ThisModule) -> Result<Self> {
         let handle = WqExecutor::try_new(kernel::workqueue::system())?;
-        pr_info!("************************echooooooooo********************************\n");
+        pr_info!("************************LET'S GET STARTED********************************\n");
         start_listener(handle.executor())?;
         //echo_server(stream);
         Ok(Self {
